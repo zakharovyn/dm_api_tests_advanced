@@ -1,11 +1,10 @@
 import random
 
-from dm_api_account.apis.account_api import AccountApi
-from dm_api_account.apis.login_api import LoginApi
-from api_mailhog.apis.mailhog_api import MailhogApi
+from helpers.account_helper import AccountHelper
 from restclient.configuration import Configuration as MailhogConfiguration
 from restclient.configuration import Configuration as DmApiConfiguration
-from utils import get_activation_token_by_login
+from services.api_mailhog import MailHogApi
+from services.dm_api_account import DMApiAccount
 
 
 def test_put_v1_account_email():
@@ -13,98 +12,40 @@ def test_put_v1_account_email():
     mailhog_configuration = MailhogConfiguration(host='http://5.63.153.31:5025')
     dm_api_configuration = DmApiConfiguration(host=' http://5.63.153.31:5051')
 
-    mailhog_api = MailhogApi(configuration=mailhog_configuration)
-    account_api = AccountApi(configuration=dm_api_configuration)
-    login_api = LoginApi(configuration=dm_api_configuration)
+    mailhog = MailHogApi(configuration=mailhog_configuration)
+    account = DMApiAccount(configuration=dm_api_configuration)
+
+    account_helper = AccountHelper(dm_account_api=account, mailhog=mailhog)
 
     postfix: str = str(random.randint(a=0, b=1000))
     login: str = f'test_user_advanced_{postfix}'
     password: str = f'test_password_advanced{postfix}'
     email: str = f'{login}@mail.ru'
-    json_data: dict = {
-        "login": login,
-        "email": email,
-        "password": password
-    }
 
-    response = account_api.post_v1_account(json_data=json_data)
-    print(response.status_code)
-    print(response.text)
-    assert response.status_code == 201, f'Пользователь не был создан {response.json()}'
-
-    # Получить письма из почтового сервера
-    response = mailhog_api.get_api_v2_messages()
-    print(response.status_code)
-    print(response.text)
-    assert response.status_code == 200, 'Письма не были получены'
-
-    # Получить активационный токен
-    token = get_activation_token_by_login(login=login, response=response)
-    assert token is not None, f'Токен для пользователя {login} не был получен'
-
-    # Активация пользователя
-    response = account_api.put_v1_account_token(token=token)
-    print(response.status_code)
-    print(response.text)
-    assert response.status_code == 200, 'Пользователь не был активирован'
-
-    # Авторизоваться
-    json_data = {
-        "login": login,
-        "password": password,
-        "rememberMe": True
-    }
-    response = login_api.post_v1_account_login(json_data=json_data)
-    print(response.status_code)
-    print(response.text)
-    assert response.status_code == 200, 'Пользователь не смог авторизоваться'
+    account_helper.full_register_new_user(
+        login=login, password=password, email=email
+    )
+    account_helper.user_login(login=login, password=password)
 
     # Изменить почту
     new_email = postfix + email
-    json_data = {
-        "login": login,
-        "password": password,
-        "email": new_email
-    }
-    response = account_api.put_v1_account_email(json_data=json_data)
-    print(response.status_code)
-    print(response.text)
-    assert response.status_code == 200, 'При смене email произошла ошибка'
+    account_helper.change_email(
+        login=login, password=password, new_email=new_email
+    )
 
     # Авторизоваться
-    json_data = {
-        "login": login,
-        "password": password,
-        "rememberMe": True
-    }
-    response = login_api.post_v1_account_login(json_data=json_data)
-    print(response.status_code)
-    print(response.text)
-    assert response.status_code == 403, 'Пользователь смог авторизоваться'
+    account_helper.user_login(login=login, password=password, status_code=403)
 
     # Получить письма из почтового сервера
-    response = mailhog_api.get_api_v2_messages()
-    print(response.status_code)
-    print(response.text)
-    assert response.status_code == 200, 'Письма не были получены'
+    response = account_helper.get_messages()
 
     # Получить активационный токен
-    token = get_activation_token_by_login(login=login, response=response)
-    assert token is not None, f'Токен для пользователя {login} не был получен'
+    token = account_helper.get_activation_token_by_login(
+        login=login, response=response
+    )
 
     # Активация пользователя
-    response = account_api.put_v1_account_token(token=token)
-    print(response.status_code)
-    print(response.text)
-    assert response.status_code == 200, 'Пользователь не был активирован'
+    account_helper.activate_user(token=token)
 
     # Авторизоваться
-    json_data = {
-        "login": login,
-        "password": password,
-        "rememberMe": True
-    }
-    response = login_api.post_v1_account_login(json_data=json_data)
-    print(response.status_code)
-    print(response.text)
-    assert response.status_code == 200, 'Пользователь не смог авторизоваться'
+    account_helper.user_login(login=login, password=password)
