@@ -24,8 +24,5 @@ def test_put_v1_account_token():
 
     account_helper.register_new_user(login=login, password=password, email=email)
 
-    # Получить письма из почтового сервера
-    response = account_helper.get_messages()
-
     # Получить активационный токен
-    account_helper.get_activation_token_by_login(login=login, response=response)
+    account_helper.get_activation_token_by_login(login=login)

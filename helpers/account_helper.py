@@ -1,7 +1,27 @@
+import time
 from json import loads
 
 from services.dm_api_account import DMApiAccount
 from services.api_mailhog import MailHogApi
+
+
+def retrier(function):
+    def wrapper(*args, **kwargs):
+        token = None
+        count = 0
+        while token is None:
+            print(f'Попытка получения токена номер {count}')
+            response = function(*args, **kwargs)
+            count += 1
+            if count == 5:
+                raise AssertionError(
+                    'Превышено количество попыток получения активационного токена'
+                )
+            if token:
+                return response
+            time.sleep(1)
+
+    return wrapper
 
 
 class AccountHelper:
@@ -13,12 +33,13 @@ class AccountHelper:
         self.dm_account_api = dm_account_api
         self.mailhog = mailhog
 
-    @staticmethod
+    @retrier
     def get_activation_token_by_login(
-            login,
-            response
+            self,
+            login
     ):
         """Получение токена активации по логину"""
+        response = self.get_messages()
         token = None
         for item in response.json()['items']:
             user_data = loads(item['Content']['Body'])
@@ -74,8 +95,7 @@ class AccountHelper:
     ):
         """Регистрация нового пользователя"""
         self.register_new_user(login=login, password=password, email=email)
-        response = self.get_messages()
-        token = self.get_activation_token_by_login(login=login, response=response)
+        token = self.get_activation_token_by_login(login=login)
         response = self.activate_user(token=token)
         return response
 
@@ -97,14 +117,22 @@ class AccountHelper:
         assert response.status_code == 200, 'При смене email произошла ошибка'
         return response
 
-    def get_messages(self, limit: int = 10):
+    def get_messages(
+            self,
+            limit: int = 10
+            ):
         """Получение писем"""
         response = self.mailhog.mailhog_api.get_api_v2_messages(limit=limit)
         assert response.status_code == 200, 'Письма не были получены'
         return response
 
-    def activate_user(self, token: str):
+    def activate_user(
+            self,
+            token: str
+            ):
         """Активация пользователя"""
-        response = self.dm_account_api.account_api.put_v1_account_token(token=token)
+        response = self.dm_account_api.account_api.put_v1_account_token(
+            token=token
+            )
         assert response.status_code == 200, 'Пользователь не был активирован'
         return response

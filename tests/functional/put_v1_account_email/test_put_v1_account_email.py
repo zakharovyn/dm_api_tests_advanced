@@ -36,13 +36,8 @@ def test_put_v1_account_email():
     # Авторизоваться
     account_helper.user_login(login=login, password=password, status_code=403)
 
-    # Получить письма из почтового сервера
-    response = account_helper.get_messages()
-
     # Получить активационный токен
-    token = account_helper.get_activation_token_by_login(
-        login=login, response=response
-    )
+    token = account_helper.get_activation_token_by_login(login=login)
 
     # Активация пользователя
     account_helper.activate_user(token=token)
