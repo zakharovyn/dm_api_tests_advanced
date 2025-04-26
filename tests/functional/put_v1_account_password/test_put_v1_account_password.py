@@ -15,9 +15,8 @@ def test_put_v1_account_password(account_helper, prepare_user):
         login=prepare_user.login,
         email=prepare_user.email
     )
-    new_password = str(
-        f'NewPassWord{datetime.now().strftime('%d_%m_%Y_%H_%M_%S')}'
-    )
+    date = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
+    new_password = str(f'NewPassWord{date}')
     account_helper.change_password(
         login=prepare_user.login,
         old_password=prepare_user.password,

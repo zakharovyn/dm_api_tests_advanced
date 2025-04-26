@@ -141,7 +141,8 @@ class AccountHelper:
         """Получение информации о текущем пользователе"""
         response = self.dm_account_api.account_api.get_v1_account()
         assert response.status_code == status_code, \
-            'Не удалось получить информацию о текущем пользователе'
+            (f'Не удалось получить информацию о текущем пользователе: '
+             f'{response.status_code=}')
         return response
 
     def auth_client(

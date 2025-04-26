@@ -4,3 +4,7 @@ def test_delete_v1_account_login(auth_account_helper):
         password=auth_account_helper.user.password
     )
     auth_account_helper.account_helper.logout_user()
+    auth_account_helper.account_helper.auth_client(
+        login=auth_account_helper.user.login,
+        password=auth_account_helper.user.password
+    )
