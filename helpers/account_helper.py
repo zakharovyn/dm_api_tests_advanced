@@ -11,14 +11,14 @@ def retrier(function):
         count = 0
         while token is None:
             print(f'Попытка получения токена номер {count}')
-            response = function(*args, **kwargs)
+            token = function(*args, **kwargs)
             count += 1
             if count == 5:
                 raise AssertionError(
                     'Превышено количество попыток получения активационного токена'
                 )
             if token:
-                return response
+                return token
             time.sleep(1)
 
     return wrapper
@@ -136,3 +136,75 @@ class AccountHelper:
             )
         assert response.status_code == 200, 'Пользователь не был активирован'
         return response
+
+    def get_current_user_info(self, status_code: int = 200):
+        """Получение информации о текущем пользователе"""
+        response = self.dm_account_api.account_api.get_v1_account()
+        assert response.status_code == status_code, \
+            (f'Не удалось получить информацию о текущем пользователе: '
+             f'{response.status_code=}')
+        return response
+
+    def auth_client(
+            self,
+            login: str,
+            password: str
+    ):
+        response = self.user_login(login=login, password=password)
+        token = {
+            'x-dm-auth-token': response.headers['x-dm-auth-token']
+        }
+        self.dm_account_api.account_api.set_headers(token)
+        self.dm_account_api.login_api.set_headers(token)
+
+    def reset_password(
+            self,
+            login: str,
+            email: str
+    ):
+        """Сброс пароля"""
+        response = self.dm_account_api.account_api.post_v1_account_password(
+            json_data={
+                "login": login,
+                "email": email
+            }
+        )
+        return response
+
+    def change_password(
+            self,
+            login: str,
+            old_password: str,
+            new_password: str,
+    ):
+        """Смена пароля"""
+        token = self.mailhog.mailhog_api.get_token_by_login(
+            login=login,
+            reset_password=True
+        )
+        response = self.dm_account_api.account_api.put_v1_account_password(
+            json_data={
+                "login": login,
+                "token": token,
+                "oldPassword": old_password,
+                "newPassword": new_password
+            }
+        )
+        return response
+
+    def logout_user(self, status_code: int = 204, **kwargs):
+        response = self.dm_account_api.account_api.delete_v1_account_login(
+            **kwargs
+        )
+        assert response.status_code == status_code, \
+            f'Ошибка при выходе из профиля {response.status_code=}'
+        return response
+
+    def logout_user_from_all_devices(self, status_code: int = 204, **kwargs):
+        response = self.dm_account_api.account_api.delete_v1_account_login_all(
+            **kwargs
+        )
+        assert response.status_code == status_code, \
+            f'Ошибка при выходе из профиля {response.status_code=}'
+        return response
+
