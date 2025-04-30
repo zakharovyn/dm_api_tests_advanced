@@ -5,11 +5,10 @@ from types import SimpleNamespace
 import pytest
 import structlog
 
-from helpers.account_helper import AccountHelper
-from restclient.configuration import Configuration as MailhogConfiguration
-from restclient.configuration import Configuration as DmApiConfiguration
-from services.api_mailhog import MailHogApi
-from services.dm_api_account import DMApiAccount
+from restclient.client import RestClient
+from restclient.configuration import Configuration
+from services.api_mailhog.apis.mailhog_api import MailhogApi
+from services.dm_api_account.dm_api_account import DMApiAccountFacade
 
 structlog.configure(
     processors=[
@@ -23,44 +22,49 @@ structlog.configure(
 
 
 @pytest.fixture(scope='session')
-def mailhog():
-    mailhog_configuration = MailhogConfiguration(host='http://5.63.153.31:5025')
-    return MailHogApi(configuration=mailhog_configuration)
+def mailhog_api():
+    mailhog_configuration = Configuration(host='http://5.63.153.31:5025')
+    rest_client = RestClient(configuration=mailhog_configuration)
+    return MailhogApi(client=rest_client)
 
 
 @pytest.fixture(scope='session')
-def dm_api():
-    dm_api_configuration = DmApiConfiguration(host=' http://5.63.153.31:5051')
-    return DMApiAccount(configuration=dm_api_configuration)
+def dm_account(mailhog_api):
+    dm_api_config = Configuration(host=' http://5.63.153.31:5051')
+    rest_client = RestClient(configuration=dm_api_config)
+    return DMApiAccountFacade(
+        configuration=dm_api_config,
+        client=rest_client,
+        mailhog=mailhog_api
+    )
 
 
 @pytest.fixture(scope='session')
-def account_helper(mailhog, dm_api):
-    return AccountHelper(dm_account_api=dm_api, mailhog=mailhog)
-
-
-@pytest.fixture(scope='session')
-def auth_account_helper(mailhog):
-    dm_api_configuration = DmApiConfiguration(host=' http://5.63.153.31:5051')
-    account = DMApiAccount(configuration=dm_api_configuration)
-    account_helper = AccountHelper(dm_account_api=account, mailhog=mailhog)
+def auth_account(mailhog_api):
+    dm_api_config = Configuration(host=' http://5.63.153.31:5051')
+    rest_client = RestClient(configuration=dm_api_config)
+    account_facade = DMApiAccountFacade(
+        configuration=dm_api_config,
+        client=rest_client,
+        mailhog=mailhog_api
+    )
     data = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
     user = SimpleNamespace(
         login=f'test_user_advanced_{data}',
         password=f'test_password_advanced{data}',
         email=f'test_user_advanced_{data}@mail.ru'
     )
-    account_helper.full_register_new_user(
+    account_facade.account.register_and_activate_user(
         login=user.login,
         password=user.password,
         email=user.email
     )
-    account_helper.auth_client(login=user.login, password=user.password)
-    return SimpleNamespace(account_helper=account_helper, user=user)
+    account_facade.login.auth_client(login=user.login, password=user.password)
+    return SimpleNamespace(account=account_facade, user=user)
 
 
 @pytest.fixture
-def prepare_user(account_helper):
+def prepare_user():
     num = random.randint(a=0, b=1000)
     data = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
     login: str = f'test_user_advanced_{data}{num}'

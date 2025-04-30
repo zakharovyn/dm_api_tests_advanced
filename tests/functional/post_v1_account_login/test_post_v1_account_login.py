@@ -1,10 +1,13 @@
-def test_post_v1_account_login(account_helper, prepare_user):
-    account_helper.full_register_new_user(
+def test_post_v1_account_login(dm_account, prepare_user):
+    dm_account.account.register_new_user(
         login=prepare_user.login,
         password=prepare_user.password,
         email=prepare_user.email
     )
-    account_helper.user_login(
+    dm_account.account.activate_user(
+        login=prepare_user.login
+    )
+    dm_account.login.login_user(
         login=prepare_user.login,
         password=prepare_user.password
     )
