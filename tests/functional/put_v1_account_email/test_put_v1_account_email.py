@@ -15,7 +15,7 @@ def test_put_v1_account_email(dm_account, prepare_user):
     )
 
     # Изменить почту
-    new_email = TD.rand_str.format(prepare_user.email)
+    new_email = TD.new_email
     dm_account.account.change_email(
         login=prepare_user.login,
         password=prepare_user.password,

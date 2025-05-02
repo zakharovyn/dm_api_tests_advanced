@@ -1,7 +1,6 @@
-from datetime import datetime
+from generic.utilites.rand_utils import generate_password
 
 
 class PutV1AccountPasswordData:
     """Класс данных для теста PutV1AccountPassword"""
-    __date = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
-    new_password = str(f'NewPassWord{__date}')
+    new_password = generate_password()

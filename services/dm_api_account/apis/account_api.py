@@ -75,7 +75,6 @@ class AccountApi:
             path=f"/v1/account/{token}",
             **kwargs
         )
-        print(response.json())
         validate_status_code(response, status_code)
 
         response = validate_model_response(

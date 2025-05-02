@@ -25,7 +25,7 @@ def validate_request_json(json: str | BaseModel):
 def validate_model(response: Response, obj_model):
     list_obj = []
     try:
-        if type(response.json()) == list:
+        if isinstance(response.json(), list):
             for item in response.json():
                 obj = obj_model(**item.json())
                 list_obj.append(obj)
