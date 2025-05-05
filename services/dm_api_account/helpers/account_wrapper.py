@@ -1,4 +1,3 @@
-from restclient.client import RestClient
 from services.dm_api_account.apis.account_api import AccountApi
 from services.dm_api_account.models import (
     ResetPassword,
@@ -8,19 +7,15 @@ from services.dm_api_account.models import (
 )
 
 
-class Account(AccountApi):
-
-    def __init__(self, facade, client: RestClient, headers: dict = None):
-        from services.dm_api_account.dm_api_account import DMApiAccountFacade
-        super().__init__(client)
-        self.facade: DMApiAccountFacade = facade
+class AccountWrapper(AccountApi):
 
     def register_new_user(
             self,
             login: str,
             email: str,
             password: str,
-            status_code: int = 201
+            status_code: int = 201,
+            **kwargs
     ):
         response = self._post_v1_account(
             json=Registration(
@@ -28,7 +23,8 @@ class Account(AccountApi):
                 email=email,
                 password=password
             ),
-            status_code=status_code
+            status_code=status_code,
+            **kwargs
         )
         return response
 
@@ -45,13 +41,14 @@ class Account(AccountApi):
 
     def activate_user(
             self,
-            login: str,
-            status_code: int = 200
+            token: str,
+            status_code: int = 200,
+            **kwargs
     ):
-        token = self.facade.mailhog.get_token_by_login(login=login)
         response = self._put_v1_account_token(
             status_code=status_code,
-            token=token
+            token=token,
+            **kwargs
         )
         return response
 
@@ -77,13 +74,10 @@ class Account(AccountApi):
             login: str,
             old_password: str,
             new_password: str,
+            token: str,
             status_code: int = 200,
             **kwargs
     ):
-        token = self.facade.mailhog.get_token_by_login(
-            login=login,
-            reset_password=True
-        )
         response = self._put_v1_account_password(
             json=ChangePassword(
                 login=login,
@@ -114,16 +108,3 @@ class Account(AccountApi):
             **kwargs
         )
         return response
-
-# ------------------------- Вспомогательные методы -----------------------------
-
-    def register_and_activate_user(
-            self,
-            login: str,
-            email: str,
-            password: str,
-            **kwargs
-    ):
-        """Регистрация и активация пользователя"""
-        self.register_new_user(login=login, email=email, password=password)
-        return self.activate_user(login=login)

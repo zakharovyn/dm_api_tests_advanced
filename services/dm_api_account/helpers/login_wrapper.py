@@ -3,12 +3,7 @@ from services.dm_api_account.apis.login_api import LoginApi
 from services.dm_api_account.models import LoginCredentials
 
 
-class Login(LoginApi):
-
-    def __init__(self, facade, client: RestClient, headers: dict = None):
-        from services.dm_api_account.dm_api_account import DMApiAccountFacade
-        super().__init__(client)
-        self.facade: DMApiAccountFacade = facade
+class LoginWrapper(LoginApi):
 
     def login_user(
             self,
@@ -74,8 +69,3 @@ class Login(LoginApi):
         }
 
         return token
-
-    def auth_client(self, login: str, password: str):
-        """Авторизовация клиента"""
-        token = self.get_auth_token(login=login, password=password)
-        self.facade.set_headers(token)
