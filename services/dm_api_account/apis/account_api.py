@@ -108,10 +108,13 @@ class AccountApi:
         )
 
         if response.status_code == 200:
-            logger.info(f'DMApiAccount. Активация пользователя по токену: {token}')
+            logger.info(
+                f'DMApiAccount. Активация пользователя по токену: {token}'
+            )
         else:
             logger.error(
-                f'DMApiAccount. Ошибка при активации пользователя токеном {token}. '
+                f'DMApiAccount. Ошибка при активации пользователя токеном '
+                f'{token}. '
                 f'Статус код ответа: {response.status_code}. '
                 f'Тело ответа: {get_json(response)}'
             )
@@ -129,7 +132,7 @@ class AccountApi:
     def _post_v1_account_password(
             self,
             json: ResetPassword,
-            status_code: int = 201,
+            status_code: int = 200,
             **kwargs
     ) -> Response | UserEnvelope:
         """
@@ -143,11 +146,18 @@ class AccountApi:
             **kwargs
         )
 
-        if response.status_code == 201:
-            logger.info(f'DMApiAccount. Сброс пароля пользователя {json.login}')
+        if response.status_code == 200:
+            logger.info(
+                f'DMApiAccount. Сброс пароля пользователя {json.login}'
+            )
+        elif response.status_code == 201:
+            logger.info(
+                f'DMApiAccount. Сброс пароля пользователя {json.login}'
+            )
         else:
             logger.error(
-                f'DMApiAccount. Ошибка при сбросе пароля пользователя {json.login}. '
+                f'DMApiAccount. Ошибка при сбросе пароля пользователя '
+                f'{json.login}. '
                 f'Статус код ответа: {response.status_code}. '
                 f'Тело ответа: {get_json(response)}'
             )
@@ -180,8 +190,10 @@ class AccountApi:
         )
 
         if response.status_code == 200:
-            logger.info(f'DMApiAccount. Изменение пароля пользователя '
-                        f'{json.login} на новый: {json.new_password}')
+            logger.info(
+                f'DMApiAccount. Изменение пароля пользователя '
+                f'{json.login} на новый: {json.new_password}'
+            )
         else:
             logger.error(
                 f'DMApiAccount. Ошибка при изменении пароля пользователя '
@@ -219,10 +231,13 @@ class AccountApi:
         )
 
         if response.status_code == 200:
-            logger.info(f'DMApiAccount. Изменение почты пользователя {json.login}')
+            logger.info(
+                f'DMApiAccount. Изменение почты пользователя {json.login}'
+            )
         else:
             logger.error(
-                f'DMApiAccount. Ошибка при изменении почты пользователя {json.login}. '
+                f'DMApiAccount. Ошибка при изменении почты пользователя '
+                f'{json.login}. '
                 f'Статус код ответа: {response.status_code}. '
                 f'Тело ответа: {get_json(response)}'
             )

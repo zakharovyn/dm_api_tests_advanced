@@ -116,9 +116,9 @@ def auth_account(mailhog_api):
 
 @pytest.fixture
 def prepare_user():
-    random_string = get_random_string()
-    login: str = f'test_user_advanced_{random_string}'
-    password: str = f'test_password_advanced{random_string}'
+    random_string = get_random_string(length=12)
+    login: str = f'test_user_{random_string}'
+    password: str = f'test_password_{random_string}'
     email: str = f'{login}{random_string}@mail.ru'
     logger.info(
         f'Тестовые данные для регистрации пользователя: {login}, {password}, '

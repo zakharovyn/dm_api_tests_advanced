@@ -71,7 +71,7 @@ class LoginApi:
             **kwargs
         )
 
-        if response.status_code == 201:
+        if response.status_code == 204:
             logger.info(f'DMApiAccount. Разлогин текущего пользователя')
         else:
             logger.error(
@@ -98,7 +98,7 @@ class LoginApi:
             **kwargs
         )
 
-        if response.status_code == 201:
+        if response.status_code == 204:
             logger.info(
                 f'DMApiAccount. Разлогин текущего пользователя со всех '
                 f'устройств'

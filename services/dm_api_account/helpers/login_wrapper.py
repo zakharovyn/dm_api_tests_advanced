@@ -12,7 +12,6 @@ class LoginWrapper(LoginApi):
             remember_me: bool = True,
             status_code: int = 200,
             validate_response: bool = True,
-            validate_headers: bool = False,
             **kwargs
     ):
         """Залогинить пользователя"""
@@ -26,9 +25,6 @@ class LoginWrapper(LoginApi):
             status_code=status_code,
             **kwargs
         )
-        if validate_headers:
-            assert response.headers['x-dm-auth-token'], \
-                'Токен для пользователя не был получен'
         return response
 
     def logout_user(

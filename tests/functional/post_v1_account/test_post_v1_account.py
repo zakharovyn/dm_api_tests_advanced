@@ -19,7 +19,7 @@ def test_post_v1_account(account_mh, prepare_user):
     )
     assert_that(response, all_of(
         has_property('resource', has_property(
-            'login', starts_with('test_user_advanced_'))
+            'login', starts_with('test_user_'))
         ),
         has_property('resource', has_property(
             'registration', instance_of(datetime))

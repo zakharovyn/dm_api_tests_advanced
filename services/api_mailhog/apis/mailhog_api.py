@@ -27,12 +27,12 @@ class MailhogApi:
         if response.status_code == 200:
             logger.info(
                 f'Mailhog. Получение писем пользователя в количестве '
-                f'{params.get('limit')} '
+                f'{params.get("limit")} '
             )
         else:
             logger.error(
                 f'Mailhog. Ошибка при получении писем пользователя в '
-                f'количестве {params.get('limit')} '
+                f'количестве {params.get("limit")} '
                 f'Статус код ответа: {response.status_code}. '
                 f'Тело ответа: {get_json(response)}'
             )

@@ -26,6 +26,7 @@ def test_put_v1_account_email(account_mh, prepare_user):
     account_mh.account.login_api.login_user(
         login=prepare_user.login,
         password=prepare_user.password,
+        validate_response=False,
         status_code=403
     )
 
