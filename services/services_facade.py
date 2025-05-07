@@ -1,5 +1,9 @@
+from logging import getLogger
+
 from services.api_mailhog.mailhog import ApiMailhog
 from services.dm_api_account.dm_api_account import DMApiAccountFacade
+
+logger = getLogger(__name__)
 
 
 class AccountMailhogFacade:
@@ -16,6 +20,7 @@ class AccountMailhogFacade:
             login: str,
             status_code: int = 200
     ):
+        logger.info(f'Активация пользователя {login}')
         token = self.mailhog.mailhog_api.get_token_by_login(login=login)
         response = self.account.account_api.activate_user(
             token=token,
@@ -31,6 +36,7 @@ class AccountMailhogFacade:
             status_code: int = 200,
             **kwargs
     ):
+        logger.info(f'Изменение пароля для пользователя {login}')
         token = self.mailhog.mailhog_api.get_token_by_login(
             login=login,
             reset_password=True
@@ -53,6 +59,10 @@ class AccountMailhogFacade:
             **kwargs
     ):
         """Регистрация и активация пользователя"""
+        logger.info(
+            f'Регистрация нового пользователя с данными {login}, {password}, '
+            f'{email}'
+        )
         self.account.account_api.register_new_user(
             login=login,
             email=email,
