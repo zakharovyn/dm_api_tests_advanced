@@ -1,42 +1,39 @@
-import random
+from data.data.function.put_v1_account_email_data import PutV1AccountEmailData
 
 
-def test_put_v1_account_email(account_helper, prepare_user):
-    account_helper.full_register_new_user(
+def test_put_v1_account_email(account_mh, prepare_user):
+    TD = PutV1AccountEmailData
+
+    account_mh.register_and_activate_user(
         login=prepare_user.login,
         password=prepare_user.password,
         email=prepare_user.email
     )
-    account_helper.user_login(
+    account_mh.account.login_api.login_user(
         login=prepare_user.login,
         password=prepare_user.password
     )
 
     # Изменить почту
-    new_email = str(random.randint(a=0, b=1000)) + prepare_user.email
-    account_helper.change_email(
+    new_email = TD.new_email
+    account_mh.account.account_api.change_email(
         login=prepare_user.login,
         password=prepare_user.password,
         new_email=new_email
     )
 
     # Авторизоваться
-    account_helper.user_login(
+    account_mh.account.login_api.login_user(
         login=prepare_user.login,
         password=prepare_user.password,
         status_code=403
     )
 
-    # Получить активационный токен
-    token = account_helper.get_activation_token_by_login(
-        login=prepare_user.login
-    )
-
     # Активация пользователя
-    account_helper.activate_user(token=token)
+    account_mh.activate_user(login=prepare_user.login)
 
     # Авторизоваться
-    account_helper.user_login(
+    account_mh.account.login_api.login_user(
         login=prepare_user.login,
         password=prepare_user.password
     )

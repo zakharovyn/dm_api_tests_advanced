@@ -1,28 +1,29 @@
-from datetime import datetime
+from data.data.function.put_v1_account_password_data import PutV1AccountPasswordData
 
 
-def test_put_v1_account_password(account_helper, prepare_user):
-    account_helper.full_register_new_user(
+def test_put_v1_account_password(account_mh, prepare_user):
+    TD = PutV1AccountPasswordData
+
+    account_mh.register_and_activate_user(
         login=prepare_user.login,
         password=prepare_user.password,
         email=prepare_user.email
     )
-    account_helper.auth_client(
+    account_mh.account.auth_client(
         login=prepare_user.login,
         password=prepare_user.password
     )
-    account_helper.reset_password(
+    account_mh.account.account_api.reset_password(
         login=prepare_user.login,
         email=prepare_user.email
     )
-    date = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
-    new_password = str(f'NewPassWord{date}')
-    account_helper.change_password(
+    new_password = TD.new_password
+    account_mh.change_password(
         login=prepare_user.login,
         old_password=prepare_user.password,
         new_password=new_password
     )
-    account_helper.user_login(
+    account_mh.account.login_api.login_user(
         login=prepare_user.login,
         password=new_password
     )
