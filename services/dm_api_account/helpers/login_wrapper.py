@@ -10,8 +10,8 @@ class LoginWrapper(LoginApi):
             login: str,
             password: str,
             remember_me: bool = True,
-            need_json: bool = True,
             status_code: int = 200,
+            validate_response: bool = True,
             **kwargs
     ):
         """Залогинить пользователя"""
@@ -21,7 +21,7 @@ class LoginWrapper(LoginApi):
                 password=password,
                 rememberMe=remember_me
             ),
-            need_json=need_json,
+            validate_response=validate_response,
             status_code=status_code,
             **kwargs
         )
@@ -62,7 +62,8 @@ class LoginWrapper(LoginApi):
         response = self.login_user(
             login=login,
             password=password,
-            remember_me=remember_me
+            remember_me=remember_me,
+            validate_response=False
         )
         token = {
             'x-dm-auth-token': response.headers['x-dm-auth-token']

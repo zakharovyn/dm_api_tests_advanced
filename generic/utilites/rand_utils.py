@@ -10,12 +10,12 @@ def get_random_string(length: int = 16):
 
 
 def generate_user_name():
-    return f'TestUserName_{get_random_string()}'
+    return f'TestUserName_{get_random_string(length=12)}'
 
 
 def generate_user_email():
-    return f'TestUserName_{get_random_string()}' + '@email.com'
+    return f'TestUserName_{get_random_string(length=12)}' + '@email.com'
 
 
 def generate_password():
-    return get_random_string(32)
+    return get_random_string(16)

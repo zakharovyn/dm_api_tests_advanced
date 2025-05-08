@@ -1,11 +1,16 @@
 from requests import Response
 
+from logging import getLogger
+
+from generic.utilites.data_utils import get_json
 from services.dm_api_account.models import UserEnvelope, LoginCredentials
 from generic.utilites.validate_utils import (
     validate_request_json,
     validate_status_code,
 )
 from restclient.client import RestClient
+
+logger = getLogger(__name__)
 
 
 class LoginApi:
@@ -16,7 +21,7 @@ class LoginApi:
             self,
             json: LoginCredentials,
             status_code: int = 200,
-            need_json: bool = True,
+            validate_response: bool = True,
             **kwargs
     ) -> Response | UserEnvelope:
         """
@@ -28,15 +33,29 @@ class LoginApi:
             json=validate_request_json(json),
             **kwargs
         )
+
+        if response.status_code == 200:
+            logger.info(
+                f'DMApiAccount. Логин пользователя {json.login} с паролем '
+                f'{json.password}'
+            )
+        else:
+            logger.error(
+                f'DMApiAccount. Ошибка при логине пользователя {json.login} '
+                f'с паролем {json.password}'
+                f'Статус код ответа: {response.status_code}. '
+                f'Тело ответа: {get_json(response)}'
+            )
+
         validate_status_code(response, status_code)
 
         if response.status_code == 200:
             UserEnvelope(**response.json())
 
-        if need_json is True:
-            return response
-        else:
+        if validate_response:
             return UserEnvelope(**response.json())
+        else:
+            return response
 
     def _delete_v1_account_login(
             self,
@@ -51,6 +70,16 @@ class LoginApi:
             path=f"/v1/account/login",
             **kwargs
         )
+
+        if response.status_code == 204:
+            logger.info(f'DMApiAccount. Разлогин текущего пользователя')
+        else:
+            logger.error(
+                f'DMApiAccount. Ошибка при разлогине текущего пользователя. '
+                f'Статус код ответа: {response.status_code}. '
+                f'Тело ответа: {get_json(response)}'
+            )
+
         validate_status_code(response, status_code)
 
         return response
@@ -68,6 +97,20 @@ class LoginApi:
             path=f"/v1/account/login/all",
             **kwargs
         )
+
+        if response.status_code == 204:
+            logger.info(
+                f'DMApiAccount. Разлогин текущего пользователя со всех '
+                f'устройств'
+            )
+        else:
+            logger.error(
+                f'DMApiAccount. Ошибка при разлогине текущего пользователя со '
+                f'всех устройств. '
+                f'Статус код ответа: {response.status_code}. '
+                f'Тело ответа: {get_json(response)}'
+            )
+
         validate_status_code(response, status_code)
 
         return response

@@ -1,5 +1,8 @@
 from requests import Response
 
+from logging import getLogger
+
+from generic.utilites.data_utils import get_json
 from generic.utilites.validate_utils import (
     validate_request_json,
     validate_status_code,
@@ -7,6 +10,8 @@ from generic.utilites.validate_utils import (
 )
 from restclient.client import RestClient
 from services.dm_api_account.models import *
+
+logger = getLogger(__name__)
 
 
 class AccountApi:
@@ -32,6 +37,19 @@ class AccountApi:
             json=validate_request_json(json),
             **kwargs
         )
+
+        if response.status_code == 201:
+            logger.info(
+                f'DMApiAccount. Регистрация нового пользователя с данными: '
+                f'{json.login}, {json.password}, {json.email}')
+        else:
+            logger.error(
+                f'DMApiAccount. Ошибка при регистрации нового пользователя с данными: '
+                f'{json.login}, {json.password}, {json.email} '
+                f'Статус код ответа: {response.status_code}. '
+                f'Тело ответа: {get_json(response)}'
+            )
+
         validate_status_code(response, status_code)
 
         return response
@@ -50,6 +68,19 @@ class AccountApi:
             path=f"/v1/account",
             **kwargs
         )
+
+        if response.status_code == 200:
+            logger.info(
+                f'DMApiAccount. Получение информации о текущем пользователе'
+            )
+        else:
+            logger.error(
+                f'DMApiAccount. Ошибка при получении информации о текущем '
+                f'пользователе. '
+                f'Статус код ответа: {response.status_code}. '
+                f'Тело ответа: {get_json(response)}'
+            )
+
         validate_status_code(response, status_code)
 
         response = validate_model_response(
@@ -75,6 +106,19 @@ class AccountApi:
             path=f"/v1/account/{token}",
             **kwargs
         )
+
+        if response.status_code == 200:
+            logger.info(
+                f'DMApiAccount. Активация пользователя по токену: {token}'
+            )
+        else:
+            logger.error(
+                f'DMApiAccount. Ошибка при активации пользователя токеном '
+                f'{token}. '
+                f'Статус код ответа: {response.status_code}. '
+                f'Тело ответа: {get_json(response)}'
+            )
+
         validate_status_code(response, status_code)
 
         response = validate_model_response(
@@ -88,7 +132,7 @@ class AccountApi:
     def _post_v1_account_password(
             self,
             json: ResetPassword,
-            status_code: int = 201,
+            status_code: int = 200,
             **kwargs
     ) -> Response | UserEnvelope:
         """
@@ -101,6 +145,23 @@ class AccountApi:
             json=validate_request_json(json),
             **kwargs
         )
+
+        if response.status_code == 200:
+            logger.info(
+                f'DMApiAccount. Сброс пароля пользователя {json.login}'
+            )
+        elif response.status_code == 201:
+            logger.info(
+                f'DMApiAccount. Сброс пароля пользователя {json.login}'
+            )
+        else:
+            logger.error(
+                f'DMApiAccount. Ошибка при сбросе пароля пользователя '
+                f'{json.login}. '
+                f'Статус код ответа: {response.status_code}. '
+                f'Тело ответа: {get_json(response)}'
+            )
+
         validate_status_code(response, status_code)
 
         response = validate_model_response(
@@ -127,6 +188,21 @@ class AccountApi:
             json=validate_request_json(json),
             **kwargs
         )
+
+        if response.status_code == 200:
+            logger.info(
+                f'DMApiAccount. Изменение пароля пользователя '
+                f'{json.login} на новый: {json.new_password}'
+            )
+        else:
+            logger.error(
+                f'DMApiAccount. Ошибка при изменении пароля пользователя '
+                f'{json.login} '
+                f'на новый: {json.new_password}. '
+                f'Статус код ответа: {response.status_code}. '
+                f'Тело ответа: {get_json(response)}'
+            )
+
         validate_status_code(response, status_code)
 
         response = validate_model_response(
@@ -153,6 +229,19 @@ class AccountApi:
             json=validate_request_json(json),
             **kwargs
         )
+
+        if response.status_code == 200:
+            logger.info(
+                f'DMApiAccount. Изменение почты пользователя {json.login}'
+            )
+        else:
+            logger.error(
+                f'DMApiAccount. Ошибка при изменении почты пользователя '
+                f'{json.login}. '
+                f'Статус код ответа: {response.status_code}. '
+                f'Тело ответа: {get_json(response)}'
+            )
+
         validate_status_code(response, status_code)
 
         response = validate_model_response(

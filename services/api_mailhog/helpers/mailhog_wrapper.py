@@ -1,7 +1,10 @@
 import json
 import time
+from logging import getLogger
 
 from services.api_mailhog.apis.mailhog_api import MailhogApi
+
+logger = getLogger(__name__)
 
 
 def retrier(function):
@@ -9,7 +12,7 @@ def retrier(function):
         token = None
         count = 0
         while token is None:
-            print(f'Попытка получения токена номер {count}')
+            logger.info(f'Попытка получения токена номер {count}')
             token = function(*args, **kwargs)
             count += 1
             if count == 5:
@@ -51,7 +54,10 @@ class MailhogWrapper(MailhogApi):
                 'ConfirmationLinkUri']
 
         token = token_url.split('/')[-1]
-
+        logger.info(
+            f'Mailhog. Получение токена из последнего письма. Сброс пароля: '
+            f'{reset_password}. Токен: {token}'
+        )
         return token
 
     def get_token_by_login(
@@ -67,6 +73,11 @@ class MailhogWrapper(MailhogApi):
         :param login: login
         :return: token
         """
+        logger.info(
+            f'Mailhog. Получение токена для пользователя по логину. Логин: '
+            f'{login}. Текущая попытка: {attempt}. Сброс пароля: '
+            f'{reset_password}'
+        )
         if attempt == 0:
             raise AssertionError(
                 f'Не удалось получить письмо с логином {login}'
@@ -88,4 +99,5 @@ class MailhogWrapper(MailhogApi):
 
     def delete_all_messages(self):
         response = self.client.delete(path='/api/v1/messages')
+        logger.info('Mailhog. Удаление всех писем')
         return response
