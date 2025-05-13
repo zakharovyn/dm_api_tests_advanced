@@ -10,7 +10,6 @@ class LoginWrapper(LoginApi):
             login: str,
             password: str,
             remember_me: bool = True,
-            status_code: int = 200,
             validate_response: bool = True,
             **kwargs
     ):
@@ -22,31 +21,26 @@ class LoginWrapper(LoginApi):
                 rememberMe=remember_me
             ),
             validate_response=validate_response,
-            status_code=status_code,
             **kwargs
         )
         return response
 
     def logout_user(
             self,
-            status_code: int = 204,
             **kwargs
     ):
         """Разлогинить пользователя."""
         response = self._delete_v1_account_login(
-            status_code=status_code,
             **kwargs
         )
         return response
 
     def logout_user_from_all_devices(
             self,
-            status_code: int = 204,
             **kwargs
     ):
         """Разлогинить пользователя на всех устройствах"""
         response = self._delete_v1_account_login_all(
-            status_code=status_code,
             **kwargs
         )
         return response

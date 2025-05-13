@@ -14,7 +14,6 @@ class AccountWrapper(AccountApi):
             login: str,
             email: str,
             password: str,
-            status_code: int = 201,
             **kwargs
     ):
         response = self._post_v1_account(
@@ -23,18 +22,15 @@ class AccountWrapper(AccountApi):
                 email=email,
                 password=password
             ),
-            status_code=status_code,
             **kwargs
         )
         return response
 
     def get_current_user_info(
             self,
-            status_code: int = 200,
             **kwargs
     ):
         response = self._get_v1_account(
-            status_code=status_code,
             **kwargs
         )
         return response
@@ -42,11 +38,11 @@ class AccountWrapper(AccountApi):
     def activate_user(
             self,
             token: str,
-            status_code: int = 200,
+            validate_response: bool = True,
             **kwargs
     ):
         response = self._put_v1_account_token(
-            status_code=status_code,
+            validate_response=validate_response,
             token=token,
             **kwargs
         )
@@ -56,7 +52,7 @@ class AccountWrapper(AccountApi):
             self,
             login: str,
             email: str,
-            status_code: int = 200,
+            validate_response: bool = True,
             **kwargs
     ):
         response = self._post_v1_account_password(
@@ -64,7 +60,7 @@ class AccountWrapper(AccountApi):
                 login=login,
                 email=email
             ),
-            status_code=status_code,
+            validate_response=validate_response,
             **kwargs
         )
         return response
@@ -75,7 +71,7 @@ class AccountWrapper(AccountApi):
             old_password: str,
             new_password: str,
             token: str,
-            status_code: int = 200,
+            validate_response: bool = True,
             **kwargs
     ):
         response = self._put_v1_account_password(
@@ -85,7 +81,7 @@ class AccountWrapper(AccountApi):
                 oldPassword=old_password,
                 newPassword=new_password
             ),
-            status_code=status_code,
+            validate_response=validate_response,
             **kwargs
         )
         return response
@@ -95,7 +91,7 @@ class AccountWrapper(AccountApi):
             login: str,
             password: str,
             new_email: str,
-            status_code: int = 200,
+            validate_response: bool = True,
             **kwargs
     ):
         response = self._put_v1_account_email(
@@ -104,7 +100,7 @@ class AccountWrapper(AccountApi):
                 password=password,
                 email=new_email
             ),
-            status_code=status_code,
+            validate_response=validate_response,
             **kwargs
         )
         return response

@@ -6,7 +6,7 @@ from generic.utilites.data_utils import get_json
 from services.dm_api_account.models import UserEnvelope, LoginCredentials
 from generic.utilites.validate_utils import (
     validate_request_json,
-    validate_status_code,
+    validate_status_code, validate_model_response,
 )
 from restclient.client import RestClient
 
@@ -20,7 +20,6 @@ class LoginApi:
     def _post_v1_account_login(
             self,
             json: LoginCredentials,
-            status_code: int = 200,
             validate_response: bool = True,
             **kwargs
     ) -> Response | UserEnvelope:
@@ -47,19 +46,15 @@ class LoginApi:
                 f'Тело ответа: {get_json(response)}'
             )
 
-        validate_status_code(response, status_code)
-
-        if response.status_code == 200:
-            UserEnvelope(**response.json())
-
-        if validate_response:
-            return UserEnvelope(**response.json())
-        else:
-            return response
+        response = validate_model_response(
+            response=response,
+            obj_model=UserEnvelope,
+            validate_response=validate_response
+        )
+        return response
 
     def _delete_v1_account_login(
             self,
-            status_code: int = 204,
             **kwargs
     ) -> Response:
         """
@@ -80,13 +75,10 @@ class LoginApi:
                 f'Тело ответа: {get_json(response)}'
             )
 
-        validate_status_code(response, status_code)
-
         return response
 
     def _delete_v1_account_login_all(
             self,
-            status_code: int = 204,
             **kwargs
     ) -> Response:
         """
@@ -110,7 +102,5 @@ class LoginApi:
                 f'Статус код ответа: {response.status_code}. '
                 f'Тело ответа: {get_json(response)}'
             )
-
-        validate_status_code(response, status_code)
 
         return response

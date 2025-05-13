@@ -18,13 +18,13 @@ class AccountMailhogFacade:
     def activate_user(
             self,
             login: str,
-            status_code: int = 200
+            validate_response: bool = True,
     ):
         logger.info(f'Активация пользователя {login}')
         token = self.mailhog.mailhog_api.get_token_by_login(login=login)
         response = self.account.account_api.activate_user(
             token=token,
-            status_code=status_code
+            validate_response=validate_response
         )
         return response
 
@@ -33,7 +33,7 @@ class AccountMailhogFacade:
             login: str,
             old_password: str,
             new_password: str,
-            status_code: int = 200,
+            validate_response: bool = True,
             **kwargs
     ):
         logger.info(f'Изменение пароля для пользователя {login}')
@@ -46,7 +46,7 @@ class AccountMailhogFacade:
             old_password=old_password,
             new_password=new_password,
             token=token,
-            status_code=status_code,
+            validate_response=validate_response,
             **kwargs
         )
         return response
@@ -66,6 +66,7 @@ class AccountMailhogFacade:
         self.account.account_api.register_new_user(
             login=login,
             email=email,
-            password=password
+            password=password,
+            **kwargs
         )
         return self.activate_user(login=login)
