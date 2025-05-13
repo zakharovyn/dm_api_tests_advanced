@@ -1,6 +1,5 @@
 import logging
 
-import random
 from collections import namedtuple
 from datetime import datetime
 from types import SimpleNamespace
@@ -9,7 +8,7 @@ from types import SimpleNamespace
 import pytest
 import structlog
 
-from generic.utilites.rand_utils import get_random_string
+from generic.utilites.rand_utils import generate_user_name, generate_password, generate_user_email
 from restclient.client import RestClient
 from restclient.configuration import Configuration
 from services.api_mailhog.mailhog import ApiMailhog
@@ -68,7 +67,7 @@ def mailhog_api():
 
 @pytest.fixture(scope='session')
 def dm_account():
-    dm_api_config = Configuration(host=' http://5.63.153.31:5051')
+    dm_api_config = Configuration(host='http://5.63.153.31:5051')
     rest_client = RestClient(configuration=dm_api_config)
     return DMApiAccountFacade(
         configuration=dm_api_config,
@@ -87,7 +86,7 @@ def account_mh(dm_account, mailhog_api):
 
 @pytest.fixture(scope='session')
 def auth_account(mailhog_api):
-    dm_api_config = Configuration(host=' http://5.63.153.31:5051')
+    dm_api_config = Configuration(host='http://5.63.153.31:5051')
     rest_client = RestClient(configuration=dm_api_config)
     account_facade = DMApiAccountFacade(
         configuration=dm_api_config,
@@ -116,10 +115,9 @@ def auth_account(mailhog_api):
 
 @pytest.fixture
 def prepare_user():
-    random_string = get_random_string(length=12)
-    login: str = f'test_user_{random_string}'
-    password: str = f'test_password_{random_string}'
-    email: str = f'{login}{random_string}@mail.ru'
+    login: str = generate_user_name()
+    password: str = generate_password()
+    email: str = generate_user_email()
     logger.info(
         f'Тестовые данные для регистрации пользователя: {login}, {password}, '
         f'{email}'

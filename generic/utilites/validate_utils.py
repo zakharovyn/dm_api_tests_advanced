@@ -36,8 +36,8 @@ def validate_model(response: Response, obj_model):
         return response
 
 
-def validate_model_response(response: Response, obj_model, status_code: int):
-    if response.status_code == status_code and response.status_code < 300:
+def validate_model_response(response: Response, obj_model, validate_response):
+    if validate_response:
         return validate_model(response=response, obj_model=obj_model)
     else:
         return response
