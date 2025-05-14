@@ -9,17 +9,17 @@ from services.dm_api_account.models.user_envelope_model import UserRole
 
 class GetV1Account:
     @classmethod
-    def check_response_values(cls, response):
+    def check_response_values(cls, response, starts_with_: str):
         # Мягкие проверки с помощью либы assertpy
         with assertpy.soft_assertions():
-            assertpy.assert_that(response.resource.login).starts_with('test_user_advanced_')
+            assertpy.assert_that(response.resource.login).starts_with(starts_with_)
             assertpy.assert_that(response.resource.online).is_instance_of(datetime)
             assertpy.assert_that(response.resource.roles).contains(UserRole.guest, UserRole.player)
 
         # Проверки с помощью либы hamcrest
         assert_that(response, all_of(
             has_property('resource', has_property(
-                'login', starts_with('test_user_advanced_'))
+                'login', starts_with(starts_with_))
                          ),
             has_property('resource', has_property(
                 'registration', instance_of(datetime))
