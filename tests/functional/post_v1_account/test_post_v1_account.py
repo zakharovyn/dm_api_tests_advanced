@@ -19,7 +19,7 @@ def test_post_v1_account(account_mh, prepare_user):
         login=prepare_user.login,
         password=prepare_user.password
     )
-    PostV1Account.check_response_values(response)
+    PostV1Account.check_response_values(response, starts_with_='TestName_')
 
 
 @pytest.mark.parametrize('login, email, password, status_code, check', [

@@ -6,11 +6,11 @@ from hamcrest import (assert_that, starts_with, all_of, has_property,
 
 class PostV1Account:
     @classmethod
-    def check_response_values(cls, response):
+    def check_response_values(cls, response, starts_with_: str):
         today = datetime.now().strftime('%Y-%m-%d')
         assert_that(response, all_of(
             has_property('resource', has_property(
-                'login', starts_with('TestName_'))
+                'login', starts_with(starts_with_))
                          ),
             has_property('resource', has_property(
                 'registration', instance_of(datetime))

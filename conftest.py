@@ -2,11 +2,13 @@ import logging
 
 from collections import namedtuple
 from datetime import datetime
+from pathlib import Path
 from types import SimpleNamespace
 
 
 import pytest
 import structlog
+from vyper import v
 
 from generic.utilites.rand_utils import generate_user_name, generate_password, generate_user_email
 from restclient.client import RestClient
@@ -27,36 +29,35 @@ structlog.configure(
     ]
 )
 
+options = {
+    'service.dm_api_account',
+    'service.mailhog'
+}
+
+
+@pytest.fixture(scope='session', autouse=True)
+def set_config(request):
+    config = Path(__file__).parent.joinpath('config')
+    config_name = request.config.getoption('--env')
+    v.set_config_name(config_name)
+    v.add_config_path(config)
+    v.read_in_config()
+    for option in options:
+        v.set(f'{option}', request.config.getoption(f'--{option}'))
+
 
 def pytest_addoption(parser):
     parser.addoption(
-        '--log_level',
-        default='warn',
-        help='Selecting the logging level in the test',
-        choices=('debug', 'info', 'warn', 'crit', 'err')
+        '--env', action='store', default='stg', help='run stg'
     )
 
-
-@pytest.fixture(autouse=True)
-def log(caplog, pytestconfig):
-    level = pytestconfig.getoption('--log_level')
-    caplog.get_records(when='call')
-    match level:
-        case 'debug':
-            caplog.set_level(logging.DEBUG)
-        case 'info':
-            caplog.set_level(logging.INFO)
-        case 'warn':
-            caplog.set_level(logging.WARNING)
-        case 'err':
-            caplog.set_level(logging.ERROR)
-        case 'crit':
-            caplog.set_level(logging.CRITICAL)
+    for option in options:
+        parser.addoption(f'--{option}', action='store', default=None)
 
 
 @pytest.fixture(scope='session')
 def mailhog_api():
-    mailhog_configuration = Configuration(host='http://5.63.153.31:5025')
+    mailhog_configuration = Configuration(host=v.get('service.mailhog'))
     rest_client = RestClient(configuration=mailhog_configuration)
     logger.info(f'Инициализация ApiMailhog')
     return ApiMailhog(
@@ -67,7 +68,7 @@ def mailhog_api():
 
 @pytest.fixture(scope='session')
 def dm_account():
-    dm_api_config = Configuration(host='http://5.63.153.31:5051')
+    dm_api_config = Configuration(host=v.get('service.dm_api_account'))
     rest_client = RestClient(configuration=dm_api_config)
     return DMApiAccountFacade(
         configuration=dm_api_config,
@@ -86,7 +87,7 @@ def account_mh(dm_account, mailhog_api):
 
 @pytest.fixture(scope='session')
 def auth_account(mailhog_api):
-    dm_api_config = Configuration(host='http://5.63.153.31:5051')
+    dm_api_config = Configuration(host=v.get('service.dm_api_account'))
     rest_client = RestClient(configuration=dm_api_config)
     account_facade = DMApiAccountFacade(
         configuration=dm_api_config,
