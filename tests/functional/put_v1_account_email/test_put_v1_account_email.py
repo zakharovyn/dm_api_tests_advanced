@@ -1,5 +1,5 @@
 from data.data.function.put_v1_account_email_data import PutV1AccountEmailData
-from generic.utilites.context_manager import check_status_code_http
+from checkers.context_manager import check_status_code_http
 
 
 def test_put_v1_account_email(account_mh, prepare_user):
